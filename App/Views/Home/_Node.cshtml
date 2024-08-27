@@ -1,0 +1,63 @@
+@model App.Models.NodeViewModel
+@{
+    var loadMoreUrl = Url.Action("Categories", "Home", new { queryParentId = Model.Node.Id, page = Model.PageIndex + 1 });
+    var loadChildrenUrl = Url.Action("Categories", "Home", new { queryParentId = Model.Node.Id });
+    var id = "node" + Model.Node.Id.ToString().Split('-').Last();
+    var childrenId = id + "--children";
+    var page = Model.PageIndex + 1;
+}
+
+<div id="@id">
+    @if (Model.Node.Count > 0 && Model.Children.Count == 0)
+    {
+        <a class="p-3 flex justify-between cursor-pointer hover:bg-gray-200" hx-get="@loadChildrenUrl" hx-target="#@id" hx-swap="outerHTML">
+            <h2 class="">
+                @Model.Node.Name
+                @if (Model.Node.Count > 0)
+                {
+                    <span>(@Model.Node.Count)</span>
+                }
+            </h2>
+            @if (Model.Node.Count > 0 && Model.Children.Count == 0)
+            {
+                <button class="flex gap-3 items-center justify-center">
+                    <div class="absolute">
+                        @await Html.PartialAsync("_Spinner")
+                    </div>
+                    ▾️
+                </button>
+            }
+        </a>
+    }
+    else
+    {
+        <h2 class="p-3 justify-between">
+            @Model.Node.Name
+            @if (Model.Node.Count > 0)
+            {
+                <span>(@Model.Node.Count)</span>
+            }
+        </h2>
+    }
+
+    <div id="@childrenId" class="children pl-6">
+        @foreach (var item in Model.Children)
+        {
+            @await Html.PartialAsync("_Node", item)
+        }
+    </div>
+
+    @if (Model.Children.Count > 0 && page < Model.Pages)
+    {
+        var nextPageId = id + "--nextPage";
+        var childrenOobSelector = $"{childrenId}:beforeend";
+        var currentPageLabel = $"{page} / {Model.Pages}";
+
+        <div id="@nextPageId" class="pl-6 pb-3">
+            <a href="@loadMoreUrl" hx-get="@loadMoreUrl" hx-swap="delete" hx-select-oob="@nextPageId, @childrenOobSelector" class="flex gap-3 items-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                Load Next Page (@currentPageLabel)
+                @await Html.PartialAsync("_Spinner")
+            </a>
+        </div>
+    }
+</div>

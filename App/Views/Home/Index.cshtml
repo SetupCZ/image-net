@@ -1,0 +1,51 @@
+@model App.Models.NodeViewModel
+
+@{
+    Layout = null;
+    var loadTree = Url.Action("Index", "Home");
+    var loadRoot = Url.Action("Root", "Home");
+    var search = Url.Action("SearchTree", "Home");
+    var rootId = "node" + Model.Node.Id.ToString().Split('-').Last();
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Image net</title>
+    <script src="https://unpkg.com/htmx.org@2.0.2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="flex flex-col gap-3 p-6 w-8/12 m-auto">
+    <h1 class="text-xl font-semibold">Image net 🕸️</h1>
+    <div class="flex gap-3 items-center">
+        <a href="@loadRoot" hx-get="@loadRoot" hx-target="body" class="flex gap-3 items-center rounded-md bg-white px-3 pl-10 py-1.5 text-sm font-semibold leading-6 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Load root
+            @await Html.PartialAsync("_Spinner")
+        </a>
+        <a href="@loadTree" hx-get="@loadTree" hx-target="body" class="flex gap-3 items-center rounded-md bg-white px-3 pl-10 py-1.5 text-sm font-semibold leading-6 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Load tree
+            @await Html.PartialAsync("_Spinner")
+        </a>
+    </div>
+
+    <div class="flex items-center relative">
+        <input
+            type="search"
+            name="query"
+            placeholder="Begin Typing To Search Nodes..."
+            class="p-3 rounded-md border border-gray-300 w-full"
+            hx-get="@search"
+            hx-trigger="input changed delay:500ms, search"
+            hx-target="#@rootId"
+            hx-indicator="next .htmx-indicator"/>
+        <div class="absolute right-3">
+            @await Html.PartialAsync("_Spinner")
+        </div>
+    </div>
+
+    @await Html.PartialAsync("_Node", Model)
+</div>
+</body>
+</html>
